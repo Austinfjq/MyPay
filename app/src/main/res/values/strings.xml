@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">MyPay</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password (optional)</string>
+    <string name="prompt_card_id">银行卡号</string>
+    <string name="prompt_code">验证码</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_invalid_email">This password is invalid</string>
+    <string name="error_invalid_card_id">银行卡号格式有误</string>
+    <string name="error_invalid_code">验证码不能为空</string>
+    <string name="error_not_exist_card_id">银行卡号不存在</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="title_activity_login2">验证</string>
+    <string name="cookie_preference_file">CookiePrefsFile</string>
+    <string name="saved_card_id">cardId</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_cart">下单</string>
+    <string name="title_qr_code">二维码支付</string>
+    <string name="title_nfc_pay">NFC支付</string>
+    <string name="title_activity_qr_code_display">QrCodeDisplayActivity</string>
+</resources>
