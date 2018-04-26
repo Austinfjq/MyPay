@@ -78,10 +78,18 @@ public class MainActivity extends Activity {
 
     private void setContentForSeller() {
         setContentView(R.layout.activity_main2);
+        mBalanceButton = findViewById(R.id.balance_button);
         mQrCodeButton = findViewById(R.id.qr_code_button);
         mNfcPayButton = findViewById(R.id.nfc_pay_button);
         mLogOutButton = findViewById(R.id.logout);
 
+        mBalanceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, BalanceActivity.class);
+                startActivity(intent);
+            }
+        });
         mQrCodeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

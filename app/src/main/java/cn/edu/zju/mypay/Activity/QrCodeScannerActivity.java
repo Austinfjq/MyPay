@@ -1,22 +1,34 @@
 package cn.edu.zju.mypay.Activity;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.graphics.PointF;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dlazaro66.qrcodereaderview.QRCodeReaderView;
+import com.google.gson.Gson;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.edu.zju.mypay.HttpUtils;
 import cn.edu.zju.mypay.R;
 
 public class QrCodeScannerActivity extends Activity implements QRCodeReaderView.OnQRCodeReadListener {
     private QRCodeReaderView qrCodeReaderView;
-    private TextView mTextView;
+    private TextView mInfoTextView, mOrderText;
+    private TransferTask mAuthTask = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,16 +90,21 @@ public class QrCodeScannerActivity extends Activity implements QRCodeReaderView.
     @Override
     public void onQRCodeRead(String text, PointF[] points) {
         setContentView(R.layout.activity_qr_code_info_display);
-        mTextView = findViewById(R.id.text);
-        mTextView.setText(translateMessage(text)[2]);
+        mInfoTextView = findViewById(R.id.InfoText);
+        mOrderText = findViewById(R.id.orderText);
 
-        if (true) return;
-        String url="http://?.?.?.?/orderForm";
-        Map<String,String> params = new HashMap<String, String>();
-        params.put("query", "balance");
-//        params.put("cardId", savedCardId);
-//        String result = HttpUtils.submitPostData(url,params,"utf-8");
-        String result = "159.3";
+        String[] transRes = translateMessage(text);
+        mOrderText.setText(transRes[2]);
+        String userId = transRes[0];
+        String totalMoney = transRes[1];
+        float temp = Float.valueOf(totalMoney);
+        temp = (float)(Math.round(temp*100)) / 100;
+        totalMoney = String.valueOf(temp);
+        SharedPreferences sp = getSharedPreferences(getString(R.string.cookie_preference_file), MODE_PRIVATE);
+        String sellerId = sp.getString(getString(R.string.saved_card_id), "");
+
+        mAuthTask = new TransferTask(userId, sellerId, totalMoney);
+        mAuthTask.execute((Void) null);
     }
 
     @Override
@@ -100,5 +117,95 @@ public class QrCodeScannerActivity extends Activity implements QRCodeReaderView.
     protected void onPause() {
         super.onPause();
         qrCodeReaderView.stopCamera();
+    }
+
+    public class TransferTask extends AsyncTask<Void, Void, Boolean> {
+        private final String mUserId, mSellerId, mTotalMoney;
+        private int successPay;
+
+        TransferTask(String userId, String sellerId, String totalMoney) {
+            mUserId = userId;
+            mSellerId = sellerId;
+            mTotalMoney = totalMoney;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            // TODO: attempt authentication against a network service.
+
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+            String result = "0.0";
+            InputStream inputStream = null;
+
+            try {
+                String urlWithParams1 = "https://wbx.life/bank/account/pay/" + mUserId + "/" + mTotalMoney;
+                String urlWithParams2 = "https://wbx.life/bank/account/pay/" + mSellerId + "/-" + mTotalMoney;
+                URL url1 = new URL(urlWithParams1);
+                URL url2 = new URL(urlWithParams2);
+
+                urlConnection = (HttpURLConnection) url1.openConnection();
+            /* optional request header */
+                urlConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            /* optional request header */
+                urlConnection.setRequestProperty("Accept", "application/json");
+            /* for Get request */
+                urlConnection.setRequestMethod("GET");
+                int statusCode = urlConnection.getResponseCode();
+            /* 200 represents HTTP OK */
+                if (statusCode == 200) {
+                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
+                    String response = HttpUtils.dealResponseResult(inputStream);
+                    Gson gson = new Gson();
+                    successPay += 1;
+                }
+
+                urlConnection = (HttpURLConnection) url2.openConnection();
+            /* optional request header */
+                urlConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            /* optional request header */
+                urlConnection.setRequestProperty("Accept", "application/json");
+            /* for Get request */
+                urlConnection.setRequestMethod("GET");
+                statusCode = urlConnection.getResponseCode();
+            /* 200 represents HTTP OK */
+                if (statusCode == 200) {
+                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
+                    String response = HttpUtils.dealResponseResult(inputStream);
+                    Gson gson = new Gson();
+                    successPay += 2;
+                }
+            } catch (Exception e) {
+                Log.d("BalanceActivity:", "" + e);
+                Log.d("BalanceActivity:", "" + successPay);
+                // Toast.makeText(BalanceActivity.this, "网络不佳", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            Log.d("BalanceActivity:", "" + successPay);
+            if (successPay != 3)
+                return false;
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            mAuthTask = null;
+            mInfoTextView = findViewById(R.id.InfoText);
+            ImageView imageView = findViewById(R.id.success_img);
+
+            if (!success) {
+                imageView.setImageResource(R.drawable.fail_pic);
+                mInfoTextView.setText("网络不佳，错误码：" + successPay);
+            } else {
+                imageView.setImageResource(R.drawable.success_pic);
+                String res = "转账成功" + mTotalMoney + "元";
+                mInfoTextView.setText(res);
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            mAuthTask = null;
+        }
     }
 }

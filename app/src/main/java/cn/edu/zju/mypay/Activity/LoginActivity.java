@@ -225,11 +225,14 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
      * @return
      */
     private boolean isCardIdValid(String cardId) {
+        return true;
+        /*
         char bit = getBankCardCheckCode(cardId.substring(0, cardId.length() - 1));
         if(bit == 'N'){
             return false;
         }
         return cardId.charAt(cardId.length() - 1) == bit;
+        */
     }
 
     /**

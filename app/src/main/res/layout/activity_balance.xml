@@ -34,5 +34,5 @@
         android:layout_marginBottom="165dp"
         android:textColor="@color/black"
         android:textSize="18sp"
-        android:text="您的余额为：0.0元"/>
+        android:text="正在查询，请稍等"/>
 </RelativeLayout>

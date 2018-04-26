@@ -5,11 +5,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 xmlns:toolbar="http://schemas.android.com/apk/res-auto"
-                tools:context="cn.edu.zju.mypay.Activity.BalanceActivity">
+                tools:context="cn.edu.zju.mypay.Activity.QrCodeDisplayActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
-        toolbar:title="顾客二维码扫描结果"
+        toolbar:title="收款结果"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         toolbar:titleTextColor="@android:color/white"
@@ -24,14 +24,35 @@
 
     </RelativeLayout>
 
+    <ImageView
+        android:id="@+id/success_img"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_below="@+id/toolbar"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="49dp"
+        android:contentDescription="@string/app_name"
+        android:src="@drawable/ic_default"
+        />
+
     <TextView
-        android:id="@+id/text"
+        android:id="@+id/InfoText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/rl_bottom"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="211dp"
-        android:text="fdsafdsaffddddddddddddddddddddddddddddddddd"
+        android:layout_centerVertical="true"
+        android:text="正在转账，请稍等"
+        android:textColor="@color/black"
+        android:textSize="18sp"/>
+
+    <TextView
+        android:id="@+id/orderText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/InfoText"
+        android:layout_alignTop="@+id/InfoText"
+        android:layout_marginTop="45dp"
+        android:text="正在分析，请稍等"
         android:textColor="@color/black"
         android:textSize="18sp"/>
 </RelativeLayout>

@@ -48,10 +48,22 @@
                 </LinearLayout>
 
                 <Button
-                    android:id="@+id/qr_code_button"
+                    android:id="@+id/balance_button"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_below="@id/ll_user_info"
+                    android:layout_marginLeft="32dp"
+                    android:layout_marginRight="32dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/login_btn_selector"
+
+                    android:text="余额查询"
+                    android:textColor="@android:color/white" />
+                <Button
+                    android:id="@+id/qr_code_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_below="@id/balance_button"
                     android:layout_marginLeft="32dp"
                     android:layout_marginRight="32dp"
                     android:layout_marginTop="10dp"

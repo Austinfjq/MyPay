@@ -3,19 +3,31 @@ package cn.edu.zju.mypay.Activity;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcEvent;
 import android.nfc.NfcManager;
+import android.os.AsyncTask;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.Charset;
 
+import cn.edu.zju.mypay.HttpUtils;
 import cn.edu.zju.mypay.R;
 
 import static cn.edu.zju.mypay.Activity.QrCodeScannerActivity.translateMessage;
@@ -24,8 +36,9 @@ public class NFCReceiveActivity extends Activity { //implements NfcAdapter.Creat
     private final String TAG = "NFCActivityTAG";
 
     NfcAdapter mNfcAdapter;
-    TextView textView, textView2, totalMoneyView;
+    TextView textView, textView2, totalMoneyView, userIdView, orderListView;
     private PendingIntent mPendingIntent;
+    private TransferTask mAuthTask = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -98,23 +111,120 @@ public class NFCReceiveActivity extends Activity { //implements NfcAdapter.Creat
         super.onNewIntent(intent);
 
         NdefMessage[] messages = getNdefMessages(intent);
+        setContentView(R.layout.activity_nfcreceive_info);
+        TextView mOrderText;
+        mOrderText = findViewById(R.id.orderText);
         if (messages != null) {
             String message = displayByteArray(messages[0].toByteArray());
-            String res[] = translateMessage(message.substring(message.indexOf('#')+1));
+            Log.d(TAG, "message = " + message);
+            String res[] = translateMessage(message.substring(message.indexOf(".$$$")+4));
+            res[0] = res[0].trim();
+            Log.d(TAG, res[0] + "\n" + res[1] + "\n" + res[2]);
             if (res != null) {
                 String userId = res[0];
                 String totalMoney = res[1];
                 String orderList = res[2];
-                totalMoneyView = (TextView) findViewById(R.id.totalMoney);
                 float temp = Float.valueOf(totalMoney);
                 temp = (float)(Math.round(temp*100)) / 100;
                 totalMoney = String.valueOf(temp);
-                totalMoneyView.setText("成功收款：" + totalMoney + "元");
-                TextView userIdView = findViewById(R.id.userId);
-                userIdView.setText("用户ID：" + userId);
-                TextView orderListView = findViewById(R.id.orderList);
-                orderListView.setText("订单详情：\n" + orderList);
+                mOrderText.setText("订单详情：\n" + orderList);
+
+                SharedPreferences sp = getSharedPreferences(getString(R.string.cookie_preference_file), MODE_PRIVATE);
+                String sellerId = sp.getString(getString(R.string.saved_card_id), "");
+                mAuthTask = new TransferTask(userId, sellerId, totalMoney);
+                mAuthTask.execute((Void) null);
             }
+        }
+    }
+
+
+    public class TransferTask extends AsyncTask<Void, Void, Boolean> {
+        private final String mUserId, mSellerId, mTotalMoney;
+        private int successPay;
+
+        TransferTask(String userId, String sellerId, String totalMoney) {
+            mUserId = userId;
+            mSellerId = sellerId;
+            mTotalMoney = totalMoney;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            // TODO: attempt authentication against a network service.
+
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+            String result = "0.0";
+            InputStream inputStream = null;
+
+            try {
+                String urlWithParams1 = "https://wbx.life/bank/account/pay/" + mUserId + "/" + mTotalMoney;
+                String urlWithParams2 = "https://wbx.life/bank/account/pay/" + mSellerId + "/-" + mTotalMoney;
+                URL url1 = new URL(urlWithParams1);
+                URL url2 = new URL(urlWithParams2);
+
+                urlConnection = (HttpURLConnection) url1.openConnection();
+            /* optional request header */
+                urlConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            /* optional request header */
+                urlConnection.setRequestProperty("Accept", "application/json");
+            /* for Get request */
+                urlConnection.setRequestMethod("GET");
+                int statusCode = urlConnection.getResponseCode();
+            /* 200 represents HTTP OK */
+                if (statusCode == 200) {
+                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
+                    String response = HttpUtils.dealResponseResult(inputStream);
+                    Gson gson = new Gson();
+                    successPay += 1;
+                }
+
+                urlConnection = (HttpURLConnection) url2.openConnection();
+            /* optional request header */
+                urlConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            /* optional request header */
+                urlConnection.setRequestProperty("Accept", "application/json");
+            /* for Get request */
+                urlConnection.setRequestMethod("GET");
+                statusCode = urlConnection.getResponseCode();
+            /* 200 represents HTTP OK */
+                if (statusCode == 200) {
+                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
+                    String response = HttpUtils.dealResponseResult(inputStream);
+                    Gson gson = new Gson();
+                    successPay += 2;
+                }
+            } catch (Exception e) {
+                Log.d("BalanceActivity:", "" + e);
+                Log.d("BalanceActivity:", "" + successPay);
+                // Toast.makeText(BalanceActivity.this, "网络不佳", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            Log.d("BalanceActivity:", "" + successPay);
+            if (successPay != 3)
+                return false;
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            mAuthTask = null;
+
+            TextView mInfoText = findViewById(R.id.InfoText);
+            ImageView imageView = findViewById(R.id.success_img);
+
+            if (!success) {
+                imageView.setImageResource(R.drawable.fail_pic);
+                mInfoText.setText("网络不佳，错误码：" + successPay);
+            } else {
+                imageView.setImageResource(R.drawable.success_pic);
+                mInfoText.setText("成功收款：" + mTotalMoney + "元");
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            mAuthTask = null;
         }
     }
 }

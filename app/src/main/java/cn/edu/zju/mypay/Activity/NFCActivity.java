@@ -80,7 +80,7 @@ public class NFCActivity extends Activity implements NfcAdapter.CreateNdefMessag
         String totalMoney = sp.getString("totalMoney", "0.0f");
         String orderList = sp.getString("orderList", "");
 
-        byte[] mimeBytes = "application/cn.edu.zju.mypay.Activity.NFCActivity #"
+        byte[] mimeBytes = "application/cn.edu.zju.mypay.Activity.NFCActivity .$$$"
                 .getBytes(Charset.forName("US-ASCII"));
         byte[] id = new byte[] {1, 3, 3, 7};
         byte[] payload = (cardId + "##" + totalMoney + "##" + orderList).getBytes(Charset.forName("US-ASCII"));

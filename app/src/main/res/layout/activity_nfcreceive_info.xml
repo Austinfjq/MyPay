@@ -1,24 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                xmlns:toolbar="http://schemas.android.com/apk/res-auto"
+                tools:context="cn.edu.zju.mypay.Activity.NFCReceiveActivity">
+
+<android.support.v7.widget.Toolbar
+    android:id="@+id/toolbar"
+    toolbar:title="收款结果"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:toolbar="http://schemas.android.com/apk/res-auto"
-    tools:context="cn.edu.zju.mypay.Activity.NFCReceiveActivity">
+    android:layout_height="wrap_content"
+    toolbar:titleTextColor="@android:color/white"
+    android:background="@color/theme_color_primary" />
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        toolbar:title="NFC收款"
-        android:layout_width="match_parent"
+<RelativeLayout
+    android:id="@+id/rl_bottom"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:layout_alignParentBottom="true"
+    >
+
+</RelativeLayout>
+
+<ImageView
+    android:id="@+id/success_img"
+    android:layout_width="100dp"
+    android:layout_height="100dp"
+    android:layout_below="@+id/toolbar"
+    android:layout_centerHorizontal="true"
+    android:layout_marginTop="49dp"
+    android:contentDescription="@string/app_name"
+    android:src="@drawable/ic_default"
+    />
+
+    <TextView
+        android:id="@+id/InfoText"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        toolbar:titleTextColor="@android:color/white"
-        android:background="@color/theme_color_primary" />
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text="正在转账，请稍等"
+        android:textColor="@color/black"
+        android:textSize="18sp"/>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/my_recycler_view"
-        android:scrollbars="vertical"
-        android:layout_below="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+<TextView
+    android:id="@+id/orderText"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignStart="@+id/InfoText"
+    android:layout_alignTop="@+id/InfoText"
+    android:layout_marginTop="45dp"
+    android:text="正在分析，请稍等"
+    android:textColor="@color/black"
+    android:textSize="18sp"/>
 </RelativeLayout>
