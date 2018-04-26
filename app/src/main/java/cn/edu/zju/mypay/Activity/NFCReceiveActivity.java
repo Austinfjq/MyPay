@@ -111,23 +111,26 @@ public class NFCReceiveActivity extends Activity { //implements NfcAdapter.Creat
         super.onNewIntent(intent);
 
         NdefMessage[] messages = getNdefMessages(intent);
-        setContentView(R.layout.activity_nfcreceive_info);
-        TextView mOrderText;
-        mOrderText = findViewById(R.id.orderText);
+        setContentView(R.layout.activity_qr_code_info_display);
+        TextView mInfoTextView = findViewById(R.id.InfoText);
+        TextView mOrderText = findViewById(R.id.orderText);
+        TextView mOrderText2 = findViewById(R.id.orderText2);
+
         if (messages != null) {
             String message = displayByteArray(messages[0].toByteArray());
             Log.d(TAG, "message = " + message);
             String res[] = translateMessage(message.substring(message.indexOf(".$$$")+4));
-            res[0] = res[0].trim();
-            Log.d(TAG, res[0] + "\n" + res[1] + "\n" + res[2]);
             if (res != null) {
+                res[0] = res[0].trim();
+                Log.d(TAG, res[0] + "\n" + res[1] + "\n" + res[2]);
                 String userId = res[0];
                 String totalMoney = res[1];
                 String orderList = res[2];
                 float temp = Float.valueOf(totalMoney);
                 temp = (float)(Math.round(temp*100)) / 100;
                 totalMoney = String.valueOf(temp);
-                mOrderText.setText("订单详情：\n" + orderList);
+                mOrderText.setText("订单详情：");
+                mOrderText2.setText(orderList);
 
                 SharedPreferences sp = getSharedPreferences(getString(R.string.cookie_preference_file), MODE_PRIVATE);
                 String sellerId = sp.getString(getString(R.string.saved_card_id), "");

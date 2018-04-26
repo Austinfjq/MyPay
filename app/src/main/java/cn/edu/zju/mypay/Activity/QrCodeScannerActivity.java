@@ -27,7 +27,7 @@ import cn.edu.zju.mypay.R;
 
 public class QrCodeScannerActivity extends Activity implements QRCodeReaderView.OnQRCodeReadListener {
     private QRCodeReaderView qrCodeReaderView;
-    private TextView mInfoTextView, mOrderText;
+    private TextView mInfoTextView, mOrderText, mOrderText2;
     private TransferTask mAuthTask = null;
 
     @Override
@@ -67,11 +67,11 @@ public class QrCodeScannerActivity extends Activity implements QRCodeReaderView.
                 if (sentence.contains("*")) {
                     String[] idAndNum = sentence.split("\\*");
                     if (Integer.valueOf(idAndNum[0]) >= 300) {
-                        sentence = "包子*" + idAndNum[1];
+                        sentence = idAndNum[1] + "x             包子";
                     } else if (Integer.valueOf(idAndNum[0]) >= 200) {
-                        sentence = "香蕉*" + idAndNum[1];
+                        sentence = idAndNum[1] + "x             香蕉";
                     } else {
-                        sentence = names[Integer.valueOf(idAndNum[0])-100] + idAndNum[1];
+                        sentence = idAndNum[1] + "x             " + names[Integer.valueOf(idAndNum[0])-100];
                     }
                 }
             } catch (Exception e) {
@@ -92,9 +92,11 @@ public class QrCodeScannerActivity extends Activity implements QRCodeReaderView.
         setContentView(R.layout.activity_qr_code_info_display);
         mInfoTextView = findViewById(R.id.InfoText);
         mOrderText = findViewById(R.id.orderText);
+        mOrderText2 = findViewById(R.id.orderText2);
 
         String[] transRes = translateMessage(text);
-        mOrderText.setText(transRes[2]);
+        mOrderText.setText("订单详情：");
+        mOrderText2.setText(transRes[2]);
         String userId = transRes[0];
         String totalMoney = transRes[1];
         float temp = Float.valueOf(totalMoney);
