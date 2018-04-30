@@ -111,16 +111,16 @@ public class NFCReceiveActivity extends Activity { //implements NfcAdapter.Creat
         super.onNewIntent(intent);
 
         NdefMessage[] messages = getNdefMessages(intent);
-        setContentView(R.layout.activity_qr_code_info_display);
-        TextView mInfoTextView = findViewById(R.id.InfoText);
-        TextView mOrderText = findViewById(R.id.orderText);
-        TextView mOrderText2 = findViewById(R.id.orderText2);
 
         if (messages != null) {
+            setContentView(R.layout.activity_qr_code_info_display);
+            TextView mInfoTextView = findViewById(R.id.InfoText);
+            TextView mOrderText = findViewById(R.id.orderText);
+            TextView mOrderText2 = findViewById(R.id.orderText2);
             String message = displayByteArray(messages[0].toByteArray());
             Log.d(TAG, "message = " + message);
             String res[] = translateMessage(message.substring(message.indexOf(".$$$")+4));
-            if (res != null) {
+            if (res != null && res.length >= 3) {
                 res[0] = res[0].trim();
                 Log.d(TAG, res[0] + "\n" + res[1] + "\n" + res[2]);
                 String userId = res[0];
@@ -137,6 +137,8 @@ public class NFCReceiveActivity extends Activity { //implements NfcAdapter.Creat
                 mAuthTask = new TransferTask(userId, sellerId, totalMoney);
                 mAuthTask.execute((Void) null);
             }
+        } else {
+            Toast.makeText(NFCReceiveActivity.this, "错误的NFC标签", Toast.LENGTH_SHORT).show();
         }
     }
 

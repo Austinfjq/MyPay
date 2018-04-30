@@ -89,12 +89,16 @@ public class QrCodeScannerActivity extends Activity implements QRCodeReaderView.
     // "points" : points where QR control points are placed in View
     @Override
     public void onQRCodeRead(String text, PointF[] points) {
+        String[] transRes = translateMessage(text);
+        if (transRes == null || transRes.length < 3) {
+            Toast.makeText(QrCodeScannerActivity.this, "错误的二维码", Toast.LENGTH_SHORT).show();
+            return;
+        }
         setContentView(R.layout.activity_qr_code_info_display);
         mInfoTextView = findViewById(R.id.InfoText);
         mOrderText = findViewById(R.id.orderText);
         mOrderText2 = findViewById(R.id.orderText2);
 
-        String[] transRes = translateMessage(text);
         mOrderText.setText("订单详情：");
         mOrderText2.setText(transRes[2]);
         String userId = transRes[0];
